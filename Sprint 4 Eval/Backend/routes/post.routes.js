@@ -11,20 +11,20 @@ postRouter.get("/", async (req, res) => {
 
     try {
         if (decoded) {
-            const filters = { "userID":decoded.userID };
+            const filters = { "userID": decoded.userID };
             if (req.query.user) {
-                    filters.userID = req.query.user;          // added a query for userID based filtering
-                }
-            if (req.query.minComments && req.query.maxComments) {
-                query.comments = { $gte: Number(req.query.minComments), $lte:Number(req.query.maxComments) }; //added  filer for minimum comments
+                filters.userID = req.query.user;          // added a query for userID based filtering
             }
-            
-            const posts = await PostModel.find(filters);
+            if (req.query.minComments && req.query.maxComments) {
+                query.comments = { $gte: Number(req.query.minComments), $lte: Number(req.query.maxComments) }; //added  filer for minimum comments
+            }
+            const count = await PostModel.countDocuments(filters);
+            const posts = await PostModel.find(filters).skip((Number(req.query.page) - 1) * 3).limit(3);
             res.status(200).send(posts);
-            
-            
 
-            
+
+
+
         }
     } catch (err) {
         res.status(400).send(err.message);

@@ -24,6 +24,27 @@ userRouter.post("/register", async (req, res) => {
 
 })
 
+//login
+userRouter.post("/login", async (req, res) => {
+    const { email, password } = req.body;
+    try {
+        const user = await UserModel.findOne({ email })
+        if (user) {
+            bcrypt.compare(password, user.password, (err, result) => {
+                if (result) {
+                    res.status(200).send({ "msg": "Login Successful", "token": jwt.sign({ "userID": user._id }, "masai") })
+                } else {
+                    res.status(400).send({ "msg": err.message })
+                }
+            })
+        } else {
+            res.send("login Failed!");
+        }
+    } catch (err) {
+        res.status(400).send({ "msg": err.message });
+    }
+})
+
 module.exports = {
     userRouter
 }

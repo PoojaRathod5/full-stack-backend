@@ -1,0 +1,11 @@
+.App {
+  text-align: center;
+}
+
+.navbar{
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  border-bottom: 1px solid gray;
+  margin: 10px;
+}

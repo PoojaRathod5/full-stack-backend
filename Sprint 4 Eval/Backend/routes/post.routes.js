@@ -18,6 +18,8 @@ postRouter.get("/", async (req, res) => {
             if (req.query.minComments && req.query.maxComments) {
                 query.comments = { $gte: Number(req.query.minComments), $lte: Number(req.query.maxComments) }; //added  filer for minimum comments
             }
+
+
             const count = await PostModel.countDocuments(filters);
             const posts = await PostModel.find(filters).skip((Number(req.query.page) - 1) * 3).limit(3);
             res.status(200).send(posts);
@@ -37,6 +39,24 @@ postRouter.post("/add", async (req, res) => {
         const post = new PostModel(req.body);
         await post.save();
         res.status(200).send({ "msg": "A new post has been added" })
+    } catch (err) {
+        res.status(400).send(err.message);
+    }
+})
+
+//top3
+postRouter.get("/top", async (req, res) => {
+    const token = req.headers.authorization.split(" ")[1];
+    const decoded = jwt.verify(token, "masai");
+    try {
+        if (decoded) {
+            const posts = await PostModel.aggregate([
+                { $match: decoded.userID },
+                { $sort: { comments: -1 } },
+                { $limit: 3 }
+            ]);
+            res.status(200).send(posts);
+        }
     } catch (err) {
         res.status(400).send(err.message);
     }

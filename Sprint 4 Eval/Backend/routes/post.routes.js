@@ -1,3 +1,4 @@
+const { query } = require("express");
 const express = require("express");
 const postRouter = express.Router();
 const jwt = require("jsonwebtoken");
@@ -7,10 +8,23 @@ const { PostModel } = require("../model/post.model");
 postRouter.get("/", async (req, res) => {
     const token = req.headers.authorization.split(" ")[1];
     const decoded = jwt.verify(token, "masai");
+
     try {
         if (decoded) {
-            const posts = await PostModel.find({ "userID": decoded.userID });
+            const filters = { "userID":decoded.userID };
+            if (req.query.user) {
+                    filters.userID = req.query.user;          // added a query for userID based filtering
+                }
+            if (req.query.minComments && req.query.maxComments) {
+                query.comments = { $gte: Number(req.query.minComments), $lte:Number(req.query.maxComments) }; //added  filer for minimum comments
+            }
+            
+            const posts = await PostModel.find(filters);
             res.status(200).send(posts);
+            
+            
+
+            
         }
     } catch (err) {
         res.status(400).send(err.message);

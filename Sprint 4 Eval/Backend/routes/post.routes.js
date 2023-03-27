@@ -29,19 +29,31 @@ postRouter.post("/add", async (req, res) => {
 })
 
 //update post
-postRouter.post("/", async (req, res) => {
+postRouter.patch("/update/:postID", async (req, res) => {
+    const payload = req.body;
+    const postID = req.params.postID;
     try {
-            
+        await PostModel.findByIdAndUpdate({ _id: postID }, payload);
+        res.status(200).send({ "msg": "Post has been updated" })
     } catch (err) {
         res.status(400).send(err.message);
     }
 })
 
 //delete a post
-postRouter.post("/", async (req, res) => {
+postRouter.delete("/delete/:postID", async (req, res) => {
+    const postID = req.params.postID;
     try {
-
+        const deletedPost = await PostModel.findByIdAndDelete({ _id: postID });
+        if (!deletedPost) {
+            return res.status(400).send({ "msg": "Post not found" })
+        }
+        res.status(200).send({ "msg": "Post deleted succesfully" })
     } catch (err) {
         res.status(400).send(err.message);
     }
 })
+
+module.exports = {
+    postRouter
+}
